@@ -7,12 +7,6 @@ void ofApp::setup(){
 	model.setScaleNormalization(false);
 	shadowMap.setup(4096);
 
-	for(size_t i=0; i<model.getNumMeshes(); i++){
-		shadowMap.setupMaterialWithShadowMap(model.getMeshHelper(i).material);
-	}
-
-	shadowMap.setupMaterialWithShadowMap(groundMaterial);
-
 	light.enable();
 	camera.setDistance(200);
 	ground.setOrientation(ofQuaternion(-90.f, ofVec3f(1.f, 0.f, 0.f)));
@@ -45,20 +39,15 @@ void ofApp::draw(){
 	light.setOrientation(q);
 
 	if(enableShadows){
-		shadowMap.begin(light, fustrumSize, 1, farClip);
+		shadowMap.updateShadow(light, fustrumSize, 1, farClip);
 		model.drawFaces();
-		shadowMap.end();
-
-		for(size_t i=0; i<model.getNumMeshes(); i++){
-			shadowMap.updateMaterial(model.getMeshHelper(i).material);
-		}
-		shadowMap.updateMaterial(groundMaterial);
+		shadowMap.endUpdate();
 	}
 
 	camera.begin();
-	shadowMap[groundMaterial].begin();
+	shadowMap.castShadow();
 	ground.draw();
-	shadowMap[groundMaterial].end();
+	shadowMap.endCast();
 	model.drawFaces();
 	light.draw();
 	camera.end();

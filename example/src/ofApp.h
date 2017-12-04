@@ -42,12 +42,11 @@ class ofApp : public ofBaseApp{
 		ofxPanel gui{parameters};
 
 		ofPlanePrimitive ground{400,400,2,2};
-		ofMaterial groundMaterial;
 
 		void listenerFunction(bool& on) {
 			if (!on) {
-				shadowMap.begin(light, fustrumSize, 1, farClip);
-				shadowMap.end();
+				shadowMap.updateShadow(light, fustrumSize, 1, farClip);
+				shadowMap.endUpdate();
 			}
 		}
 

@@ -75,10 +75,66 @@ bool ofxShadowMap::setup(int size, Resolution resolution){
 //	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 //	fbo.getDepthTexture().unbind();
 
+	setupMaterialWithShadowMap(shadowMaterial);
+
 	return success;
 }
 
-void ofxShadowMap::setupMaterialWithShadowMap(ofMaterial & material){
+void ofxShadowMap::updateShadow(ofLight & light, float fustrumSize, float nearClip, float farClip)
+{
+	float left = -fustrumSize / 2.;
+	float right = fustrumSize / 2.;
+	float top = fustrumSize / 2.;
+	float bottom = -fustrumSize / 2.;
+
+	auto ortho = glm::ortho(left, right, bottom, top, nearClip, farClip);
+	auto view = glm::inverse(toGlm(light.getGlobalTransformMatrix()));
+
+	auto viewProjection = ortho * view;
+	auto bias = glm::mat4(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0);
+	lastBiasedMatrix = bias * viewProjection;
+	writeMapShader.begin();
+
+	fbo.begin(true);
+	ofPushView();
+
+	ofSetMatrixMode(OF_MATRIX_PROJECTION);
+	ofLoadMatrix(toOf(ortho));
+
+	ofSetMatrixMode(OF_MATRIX_MODELVIEW);
+	ofLoadViewMatrix(toOf(view));
+
+	ofViewport(ofRectangle(0, 0, fbo.getWidth(), fbo.getHeight()));
+	ofClear(0);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+}
+
+void ofxShadowMap::endUpdate()
+{
+	glDisable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	writeMapShader.end();
+	ofPopView();
+	fbo.end();
+	updateMaterial(shadowMaterial);
+}
+
+void ofxShadowMap::castShadow()
+{
+	shadowMaterial.begin();
+}
+
+void ofxShadowMap::endCast()
+{
+	shadowMaterial.end();
+}
+
+void ofxShadowMap::setupMaterialWithShadowMap(extMaterial & material){
 	constexpr const char * visibilityFunc = R"(
 		vec2 poissonDisk64[64] = vec2[](
 		   vec2(-0.613392, 0.617481),
@@ -234,71 +290,26 @@ void ofxShadowMap::setupMaterialWithShadowMap(ofMaterial & material){
 	)";
 	settings.postFragment = visibilityFunc;
 
-	auto& proxyMaterial = proxyMaterials[&material];
-	static_cast<ofMaterial&>(proxyMaterial) = material;
-	proxyMaterial.setup(settings);
+	shadowMaterial.setup(settings);
 }
 
+void ofxShadowMap::updateMaterial(extMaterial & material){
 
-void ofxShadowMap::begin(ofLight & light, float fustrumSize, float nearClip, float farClip){
-	float left = -fustrumSize / 2.;
-	float right = fustrumSize / 2.;
-	float top = fustrumSize / 2.;
-	float bottom = -fustrumSize / 2.;
-
-	auto ortho = glm::ortho(left, right, bottom, top, nearClip, farClip);
-	auto view = glm::inverse(toGlm(light.getGlobalTransformMatrix()));
-
-	auto viewProjection = ortho * view;
-	auto bias = glm::mat4(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0);
-	lastBiasedMatrix = bias * viewProjection;
-	writeMapShader.begin();
-
-	fbo.begin(true);
-	ofPushView();
-
-	ofSetMatrixMode(OF_MATRIX_PROJECTION);
-	ofLoadMatrix(toOf(ortho));
-
-	ofSetMatrixMode(OF_MATRIX_MODELVIEW);
-	ofLoadViewMatrix(toOf(view));
-
-	ofViewport(ofRectangle(0,0,fbo.getWidth(),fbo.getHeight()));
-	ofClear(0);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-}
-
-void ofxShadowMap::end(){
-	glDisable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	writeMapShader.end();
-	ofPopView();
-	fbo.end();
-}
-
-void ofxShadowMap::updateMaterial(ofMaterial & material){
-	auto& proxyMaterial = proxyMaterials[&material];
-
-	proxyMaterial.begin();
-	proxyMaterial.setCustomUniformMatrix4f("biasedMvp", lastBiasedMatrix);
-	proxyMaterial.setCustomUniform1f("shadowSub", shadowSub);
-	proxyMaterial.setCustomUniform1f("hardShadows", hardShadows ? 1.f : 0.f);
-	proxyMaterial.setCustomUniform1f("biasFactor", biasFactor);
-	proxyMaterial.setCustomUniform1f("shadowSoftScatter", shadowSoftScatter);
+	material.begin();
+	material.setCustomUniformMatrix4f("biasedMvp", lastBiasedMatrix);
+	material.setCustomUniform1f("shadowSub", shadowSub);
+	material.setCustomUniform1f("hardShadows", hardShadows ? 1.f : 0.f);
+	material.setCustomUniform1f("biasFactor", biasFactor);
+	material.setCustomUniform1f("shadowSoftScatter", shadowSoftScatter);
 
 	//	material.setCustomUniformTexture("shadowMap", getDepthTexture(), 0);
 	const int texUnit = 1;
 	glActiveTexture(GL_TEXTURE0 + texUnit);
 	glBindTexture(GL_TEXTURE_2D, fbo.getDepthTexture().getTextureData().textureID);
 	glBindSampler(texUnit, *samplerID);
-	proxyMaterial.setCustomUniform1i("shadowMap", texUnit);
+	material.setCustomUniform1i("shadowMap", texUnit);
 	glActiveTexture(GL_TEXTURE0);
-	proxyMaterial.end();
+	material.end();
 }
 
 const ofTexture & ofxShadowMap::getDepthTexture() const{

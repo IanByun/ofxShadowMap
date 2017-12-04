@@ -14,12 +14,13 @@ public:
 		_16,
 	};
 	bool setup(int size, Resolution resolution = _32);
-	void setupMaterialWithShadowMap(ofMaterial & material);
 
-	void begin(ofLight & light, float fustrumSize, float nearClip, float farClip);
-	void end();
+	void updateShadow(ofLight& light, float fustrumSize, float nearClip, float farClip);
+	void endUpdate();
 
-	void updateMaterial(ofMaterial & material);
+	void castShadow();
+	void endCast();
+
 	const ofTexture & getDepthTexture() const;
 	ofTexture & getDepthTexture();
 
@@ -43,12 +44,7 @@ private:
 	}
 	std::unique_ptr<GLuint, decltype(&deleteSampler)> samplerID{new GLuint, &deleteSampler};
 
-	std::unordered_map<ofMaterial*, extMaterial> proxyMaterials;
-public:
-	auto& getShadowedMaterial(ofMaterial& material) {
-		return proxyMaterials[&material];
-	}
-	auto& operator[](ofMaterial& material) {
-		return getShadowedMaterial(material);
-	}
+	extMaterial shadowMaterial;
+	void setupMaterialWithShadowMap(extMaterial & material);
+	void updateMaterial(extMaterial & material);
 };
