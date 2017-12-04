@@ -4,14 +4,7 @@
 #include "ofShader.h"
 #include "ofFbo.h"
 #include "ofParameter.h"
-
-#ifndef OF_VER_09X
-	#define OF_VER_09X (OF_VERSION_MAJOR < 1 && OF_VERSION_MINOR < 10)
-#endif // !OF_VER_09X
-
-#if OF_VER_09X
-	#include "extMaterial.hpp"
-#endif
+#include "extMaterial.hpp"
 
 class ofxShadowMap{
 public:
@@ -49,7 +42,7 @@ private:
 		glDeleteSamplers(1, sampler);
 	}
 	std::unique_ptr<GLuint, decltype(&deleteSampler)> samplerID{new GLuint, &deleteSampler};
-#if OF_VER_09X
+
 	std::unordered_map<ofMaterial*, extMaterial> proxyMaterials;
 public:
 	auto& getShadowedMaterial(ofMaterial& material) {
@@ -58,5 +51,4 @@ public:
 	auto& operator[](ofMaterial& material) {
 		return getShadowedMaterial(material);
 	}
-#endif
 };

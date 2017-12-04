@@ -28,15 +28,11 @@ void main (void){
     vec3 tempNormal = (normalMatrix * normal).xyz;
     v_transformedNormal = normalize(tempNormal);
     v_normal = normal.xyz;
-    v_eyePosition = (eyePosition.xyz) / eyePosition.w;)"
-
-#if (OF_VERSION_MAJOR < 1 && OF_VERSION_MINOR < 10)
-	R"(v_worldPosition = (inverse(viewMatrix) * modelViewMatrix * position).xyz;)"
-#else
-	R"(v_worldPosition = (modelMatrix * position).xyz;)"
-#endif
-
-    R"(v_texcoord = (textureMatrix*vec4(texcoord.x,texcoord.y,0,1)).xy;
+    v_eyePosition = (eyePosition.xyz) / eyePosition.w;
+	
+	v_worldPosition = (inverse(viewMatrix) * modelViewMatrix * position).xyz;
+	
+	v_texcoord = (textureMatrix*vec4(texcoord.x,texcoord.y,0,1)).xy;
     #if HAS_COLOR
         v_color = color;
     #endif

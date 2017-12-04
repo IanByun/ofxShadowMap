@@ -15,23 +15,9 @@ void ofApp::setup(){
 
 	light.enable();
 	camera.setDistance(200);
-	ground.setOrientation(
-#if OF_VER_09X
-		ofQuaternion(-90.f, ofVec3f(1.f, 0.f, 0.f)));
-#else
-		glm::angleAxis(ofDegToRad(-90.f), glm::vec3{ 1.f,0.f,0.f }));
-#endif
+	ground.setOrientation(ofQuaternion(-90.f, ofVec3f(1.f, 0.f, 0.f)));
 
-#if OF_VER_09X
 	enableShadows.addListener(this, &ofApp::listenerFunction);
-#else
-	listener = enableShadows.newListener([this](bool & on) {
-		if (!on) {
-			shadowMap.begin(light, fustrumSize, 1, farClip);
-			shadowMap.end();
-		}
-	});
-#endif
 }
 
 //--------------------------------------------------------------
@@ -47,22 +33,16 @@ void ofApp::draw(){
 //	light.lookAt({0,0,0});
 	float longitude = ofMap(ofGetMouseX(), 0, ofGetWidth(), -90, 90);
 	float latitude = ofMap(ofGetMouseY(), 0, ofGetHeight(), -60, -10);
-#if OF_VER_09X
 	float radius = 200;
-	ofVec3f centerPoint = { 0,20,0 };
-	glm::quat q =
-		glm::angleAxis(ofDegToRad(longitude), glm::vec3(0, 1, 0))
-		* glm::angleAxis(ofDegToRad(latitude), glm::vec3(1, 0, 0));
+	ofVec3f centerPoint(0, 20 , 0);
+	ofQuaternion q = ofQuaternion(longitude, ofVec3f(0, 1, 0)) * ofQuaternion(latitude, ofVec3f(1, 0, 0));
 
-	glm::vec4 p{ 0.f, 0.f, 1.f, 0.f };	   // p is a direction, not a position, so .w == 0
+	ofVec4f p (0.f, 0.f, 1.f, 0.f); // p is a direction, not a position, so .w == 0
 
-	p = q * p;							   // rotate p on unit sphere based on quaternion
+	p = p * ofMatrix4x4(q); // rotate p on unit sphere based on quaternion
 	p = p * radius; // scale p by radius from its position on unit sphere
-	light.setGlobalPosition(centerPoint + toOf(p));
-	light.setOrientation(toOf(glm::toMat4((const glm::quat&)q)).getRotate());
-#else
-	light.orbitDeg(longitude, latitude, 200, { 0,20,0 });
-#endif
+	light.setGlobalPosition(centerPoint + p);
+	light.setOrientation(q);
 
 	if(enableShadows){
 		shadowMap.begin(light, fustrumSize, 1, farClip);
@@ -76,17 +56,9 @@ void ofApp::draw(){
 	}
 
 	camera.begin();
-#if OF_VER_09X
 	shadowMap[groundMaterial].begin();
-#else 
-	groundMaterial.begin();
-#endif
 	ground.draw();
-#if OF_VER_09X
 	shadowMap[groundMaterial].end();
-#else 
-	groundMaterial.end();
-#endif
 	model.drawFaces();
 	light.draw();
 	camera.end();
