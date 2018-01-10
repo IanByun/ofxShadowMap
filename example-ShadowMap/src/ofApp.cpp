@@ -10,6 +10,9 @@ void ofApp::setup(){
 	light.enable();
 	camera.setDistance(200);
 	ground.setOrientation(ofQuaternion(-90.f, ofVec3f(1.f, 0.f, 0.f)));
+	ground.enableColors();
+	for (int i = 0; i < ground.getMesh().getVertices().size(); i++)
+		ground.getMesh().getColors().push_back(ofFloatColor::gray);
 
 	enableShadows.addListener(this, &ofApp::listenerFunction);
 }

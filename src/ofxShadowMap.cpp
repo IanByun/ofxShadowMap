@@ -294,7 +294,6 @@ void ofxShadowMap::setupMaterialWithShadowMap(extMaterial & material){
 }
 
 void ofxShadowMap::updateMaterial(extMaterial & material){
-
 	material.begin();
 	material.setCustomUniformMatrix4f("biasedMvp", lastBiasedMatrix);
 	material.setCustomUniform1f("shadowSub", shadowSub);

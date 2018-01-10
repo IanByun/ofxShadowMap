@@ -24,7 +24,7 @@ public:
 	const ofTexture & getDepthTexture() const;
 	ofTexture & getDepthTexture();
 
-	ofParameter<float> shadowSub{"darken", 0.5, 0, 1};
+	ofParameter<float> shadowSub{"darken", 0.75, 0, 1};
 	ofParameter<float> biasFactor{"bias", 0.005, 0, 1};
 	ofParameter<bool> hardShadows{"hard shadows", true};
 	ofParameter<float> shadowSoftScatter{"soft shadows scatter", 300, 0, 1000};

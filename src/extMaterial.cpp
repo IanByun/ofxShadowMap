@@ -135,8 +135,9 @@ void extMaterial::initShaders(ofGLProgrammableRenderer & renderer) const {
 
 }
 
+// OF 098 compatible shader call
 const ofShader & extMaterial::getShader(int textureTarget, ofGLProgrammableRenderer & renderer) const {
-	bool geometryHasColor = false;
+	bool geometryHasColor = true;
 	return getShader(textureTarget, geometryHasColor, renderer);
 }
 
