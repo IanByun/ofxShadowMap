@@ -29,12 +29,12 @@ class ofApp : public ofBaseApp{
 		ofEasyCam camera;
 		ofLight light;
 
-		ofParameter<float> fustrumSize{"fustrum size", 100, 10, 1000};
+		ofParameter<float> frustumSize{"frustum size", 100, 10, 1000};
 		ofParameter<float> farClip{"far clip", 300, 10, 1000};
 		ofParameter<bool> enableShadows{"enable shaodws", true};
 		ofParameterGroup parameters{
 			"parameters",
-			fustrumSize,
+			frustumSize,
 			farClip,
 			enableShadows,
 			shadowMap.parameters,
@@ -45,7 +45,7 @@ class ofApp : public ofBaseApp{
 
 		void listenerFunction(bool& on) {
 			if (!on) {
-				shadowMap.updateShadow(light, fustrumSize, 1, farClip);
+				shadowMap.updateShadow(light, frustumSize, 1, farClip);
 				shadowMap.endUpdate();
 			}
 		}

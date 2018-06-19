@@ -80,12 +80,12 @@ bool ofxShadowMap::setup(int size, Resolution resolution){
 	return success;
 }
 
-void ofxShadowMap::updateShadow(ofLight & light, float fustrumSize, float nearClip, float farClip)
+void ofxShadowMap::updateShadow(ofLight & light, float frustumSize, float nearClip, float farClip)
 {
-	float left = -fustrumSize / 2.;
-	float right = fustrumSize / 2.;
-	float top = fustrumSize / 2.;
-	float bottom = -fustrumSize / 2.;
+	float left = -frustumSize / 2.;
+	float right = frustumSize / 2.;
+	float top = frustumSize / 2.;
+	float bottom = -frustumSize / 2.;
 
 	auto ortho = glm::ortho(left, right, bottom, top, nearClip, farClip);
 	auto view = glm::inverse(toGlm(light.getGlobalTransformMatrix()));

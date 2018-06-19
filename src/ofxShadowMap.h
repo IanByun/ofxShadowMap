@@ -15,7 +15,7 @@ public:
 	};
 	bool setup(int size, Resolution resolution = _32);
 
-	void updateShadow(ofLight& light, float fustrumSize, float nearClip, float farClip);
+	void updateShadow(ofLight& light, float frustumSize, float nearClip, float farClip);
 	void endUpdate();
 
 	void castShadow();

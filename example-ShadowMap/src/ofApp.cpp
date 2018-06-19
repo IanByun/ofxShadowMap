@@ -5,7 +5,7 @@ void ofApp::setup(){
 	model.loadModel("amua.obj");
 	model.setRotation(0,180,0,0,1);
 	model.setScaleNormalization(false);
-	shadowMap.setup(4096);
+	shadowMap.setup(1024*16);
 
 	light.enable();
 	camera.setDistance(200);
@@ -42,7 +42,7 @@ void ofApp::draw(){
 	light.setOrientation(q);
 
 	if(enableShadows){
-		shadowMap.updateShadow(light, fustrumSize, 1, farClip);
+		shadowMap.updateShadow(light, frustumSize, 1, farClip);
 		model.drawFaces();
 		shadowMap.endUpdate();
 	}
@@ -62,7 +62,24 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
+	constexpr auto amount = 1;
+	ofPoint positon = model.getPosition();
+	switch (key = tolower((char)key))
+	{
+	case 'w': 
+		positon += ofVec3f(0, 0, -amount);
+		break;
+	case 's':
+		positon += ofVec3f(0, 0, +amount);
+		break;
+	case 'a':
+		positon += ofVec3f(-amount, 0, 0);
+		break;
+	case 'd':
+		positon += ofVec3f(+amount, 0, 0);
+		break;
+	}
+	model.setPosition(positon.x, positon.y, positon.z);
 }
 
 //--------------------------------------------------------------
