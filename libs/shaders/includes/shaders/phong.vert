@@ -22,8 +22,10 @@ uniform mat4 textureMatrix;
 uniform mat4 modelViewProjectionMatrix;
 uniform mat4 normalMatrix;
 
+flat out vec4 posFlat;
+out vec4 posVarying;
 
-void main (void){
+void main (void) {
     vec4 eyePosition = modelViewMatrix * position;
     vec3 tempNormal = (normalMatrix * normal).xyz;
     v_transformedNormal = normalize(tempNormal);
@@ -37,5 +39,7 @@ void main (void){
         v_color = color;
     #endif
     gl_Position = modelViewProjectionMatrix * position;
+    posFlat = modelViewMatrix * position;
+    posVarying = modelViewMatrix * position;
 }
 )";

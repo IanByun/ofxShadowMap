@@ -212,8 +212,12 @@ static const string fragmentShader = R"(
     // here's the main method
     //////////////////////////////////////////////////////
 
+    flat in vec4 posFlat;
+    in vec4 posVarying;
 
-    void main (void){
+    void main (void) {
+        float d = distance(vec3(posFlat), vec3(posVarying));
+        if (d > 30) discard;
 
         vec3 ambient = global_ambient.rgb;
         vec3 diffuse = vec3(0.0,0.0,0.0);
